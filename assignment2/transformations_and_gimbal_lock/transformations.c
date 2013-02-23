@@ -1,0 +1,147 @@
+/* *****************************************************************************
+ *
+ * Computer Graphics - University of Amsterdam
+ * Assignment 2.1
+ *
+ * Lorenzo Liberatore (10415459) <l.liberatore@gmail.com>
+ * Ben Witzen (10189459) <benwitzen@live.nl>
+ * Feb 8, 2013
+ *
+ * Implements transformation matrices
+ *
+ * ************************************************************************** */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <GL/gl.h>
+#include "transformations.h"
+
+/* ANSI C/ISO C89 does not specify this constant (?) */
+#ifndef M_PI
+#define M_PI           3.14159265358979323846  /* pi */
+#endif
+
+
+/*
+ * Computes the cross product of vectors A and B, and stores it in vector C
+ */
+
+void outProduct(GLfloat *a, GLfloat *b, GLfloat *c) {
+    c[0] = a[1] * b[2] - a[2] * b[1];
+    c[1] = a[2] * b[0] - a[0] * b[2];
+    c[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+void normalize(GLfloat *a) {
+    GLdouble len = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
+    a[0] /= len;
+    a[1] /= len;
+    a[2] /= len;
+}
+
+void myScalef(GLfloat x, GLfloat y, GLfloat z)
+{
+    GLfloat M[16] =
+    {
+        x,   0.0, 0.0, 0.0,
+        0.0, y,   0.0, 0.0,
+        0.0, 0.0, z,   0.0,
+        0.0, 0.0, 0.0, 1.0
+    };
+
+    glMultMatrixf(M);
+}
+
+
+void myTranslatef(GLfloat x, GLfloat y, GLfloat z)
+{
+    GLfloat M[16] =
+    {
+        1.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0,
+        x,   y,   z,   1.0
+    };
+
+    glMultMatrixf(M);
+}
+
+void myRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+    GLfloat u[3], v[3], w[3], t[3];
+
+    //
+    // 1. Create the orthonormal basis
+    //
+
+    // Store the incoming rotation axis in w and normalize w
+    w[0] = x;
+    w[1] = y;
+    w[2] = z;
+    normalize(w);
+    
+    // Compute the value of t, based on w
+    t[0] = w[0];
+    t[1] = w[1];
+    t[2] = w[2];
+    
+    int i = 0, smallest = 0;
+    while (i < 3)
+        if (t[i] < t[i++])
+            smallest = t[i - 1];
+    
+    t[smallest] = 1.0;
+       
+    // Compute u = t x w
+    outProduct(t, w, u);
+
+    // Normalize u
+    normalize(u);
+
+    // Compute v = w x u
+    outProduct(w, u, v);
+    
+    //
+    // 2. Set up the three matrices making up the rotation
+    //
+
+    // Specify matrix A
+    GLfloat A[16] =
+    {
+        u[0], u[1], u[2], 0.0,
+        v[0], v[1], v[2], 0.0,
+        w[0], w[1], w[2], 0.0,
+        0.0,  0.0,  0.0,  1.0
+    };
+
+    // Convert 'angle' to radians
+    angle = (angle * M_PI) / 180.0;
+
+    // Specify matrix B
+    GLfloat B[16] =
+    {
+        cos(angle),  sin(angle), 0.0, 0.0,
+        -sin(angle), cos(angle), 0.0, 0.0,
+        0.0,         0.0,        1.0, 0.0,
+        0.0,         0.0,        0.0, 1.0
+    };
+
+    // Specify matrix C
+    GLfloat C[16] =
+    {
+        u[0], v[0], w[0], 0.0,
+        u[1], v[1], w[1], 0.0,
+        u[2], v[2], w[2], 0.0,
+        0.0,  0.0,  0.0,  1.0
+    };
+
+    //
+    // 3. Apply the matrices to get the combined rotation
+    //
+
+    glMultMatrixf(A);
+    glMultMatrixf(B);
+    glMultMatrixf(C);
+}
+

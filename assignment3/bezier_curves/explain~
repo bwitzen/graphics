@@ -1,0 +1,36 @@
+Realise that the entire graph on the lower half of the screen actually consists
+of five Bezier curves, their x-coordinate ranges being:
+ 0.00 to  3.99
+ 4.00 to  7.99
+ 8.00 to 11.99
+12.00 to 15.99
+16.00 to 19.99
+
+Then, we first need to have the code distinguish between these five Bezier
+curves. To do so, lines 177-178 calculate the leftmost and the rightmost x-
+coordinates of the Bezier curve.
+
+This then allows the code to ignore all calls that were made with x-coordinates
+out of range for a particular Bezier curve. This happens in lines 181-182.
+
+Because we may assume the entire graph is a function (i.e. each X location on
+the graph has exactly one Y height defined), and because we need not be very
+precise (.001 precision), we can search for an intersection using a binary
+search algorithm. (The alternative for this precision requirement would be to 
+try 1000 intersections, because 1 / .001 = 1000.)
+
+This binary search happens in the while-loop on lines 188-206.
+
+Lines 191-192 set the new middle point and evaluates that point. If the difference
+between our reference X and the outcome of the evaluation UX is minimal, we
+consider this point good enough, and we return it.
+If the difference is too large, we try again using a new middle point (binary
+search). If the difference between upper- and lowerbound becomes less than our
+precision requirement, we consider the search failed. Apparently, no intersection
+exists, and we return 0. (And no *y).
+
+
+
+ln 177-178
+
+Here we calculate the x coordinate

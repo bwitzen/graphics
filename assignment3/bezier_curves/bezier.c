@@ -1,0 +1,213 @@
+/* *****************************************************************************
+ *
+ * Computer Graphics - University of Amsterdam
+ * Assignment 3.2.2 and 3.2.3
+ *
+ * Lorenzo Liberatore (10415459) <l.liberatore@gmail.com>
+ * Ben Witzen (10189459) <benwitzen@live.nl>
+ * Feb 22, 2013
+ *
+ * Implements the evaluation and the draw functions for Bezier curves.
+ *
+ * ************************************************************************** */
+
+#include <math.h>
+#include "bezier.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+/*
+ * Function computes n! and returns it.
+ */
+
+int fact(int n) {
+  if ( n <= 0 )
+    return 1;
+  else if ( n == 1 || n == 2 )
+    return n;
+  else
+    return n * fact(n - 1);
+}
+
+
+/*
+ * Function computes binomial distribution and returns it (as a float).
+ */
+ 
+float binomial(int n, int k) {
+  return (float) fact(n) / (float) (fact(k) * fact(n - k));
+}
+
+
+/*
+ * Function computes Bernstein and returns it (as a float).
+ */
+
+float bernstein(int n, int i, float u) {
+  return binomial(n, i) * pow(u, i) * pow(1 - u, n - i);
+}
+
+
+/* 
+ * Given a Bezier curve defined by the 'num_points' control points
+ * in 'p' compute the position of the point on the curve for parameter
+ * value 'u'.
+ *
+ * Return the x and y values of the point by setting *x and *y,
+ * respectively.
+ */
+ 
+void evaluate_bezier_curve(float *x, float *y, control_point p[],
+                           int num_points, float u) {
+  *x = 0.0;
+  *y = 0.0;
+  
+  for (int i = 0; i < num_points; i++) {
+    *x += bernstein(num_points - 1, i, u) * p[i].x;
+    *y += bernstein(num_points - 1, i, u) * p[i].y;
+  }
+  
+}
+
+
+/* 
+ * Draw a Bezier curve defined by the control points in p[], which
+ * will contain 'num_points' points.
+ *
+ * Draw the line segments you compute directly on the screen
+ * as a single GL_LINE_STRIP. This is as simple as using
+ *
+ *      glBegin(GL_LINE_STRIP);
+ *      glVertex2f(..., ...);
+ *      ...
+ *      glEnd();
+ *
+ * DO NOT SET ANY COLOR!
+ *
+ * The 'num_segments' parameter determines the "discretization" of the Bezier
+ * curve and is the number of straight line segments that should be used
+ * to approximate the curve.
+ *
+ * Call evaluate_bezier_curve() to compute the necessary points on
+ * the curve.
+ */
+
+void draw_bezier_curve(int num_segments, control_point p[], int num_points) {
+
+  float x = 0.0, y = 0.0;
+
+  // calculate size of each step
+  float step = 1.0 / num_segments;
+  
+  // begin drawing a line consisting of "step" segments
+  glBegin(GL_LINE_STRIP);
+  
+  // compute each segment
+  for (float i = 0.0; i <= 1.0; i += step) {
+    evaluate_bezier_curve(&x, &y, p, num_points, i);
+    glVertex2f(x, y);  
+  }
+  
+  // stop drawing a line
+  glEnd();
+
+}
+
+
+/*
+ * Function returns the smallest float amongst four floats.
+ */
+
+float minimum (float a, float b, float c, float d) {
+
+  float m = a;
+  
+  if ( b < m ) m = b;
+  if ( c < m ) m = c;
+  if ( d < m ) m = d;
+  
+  return m;
+
+}
+
+
+/*
+ * Function returns the largest float amongst four floats.
+ */
+
+float maximum (float a, float b, float c, float d) {
+
+  float m = a;
+  
+  if ( b > m ) m = b;
+  if ( c > m ) m = c;
+  if ( d > m ) m = d;
+  
+  return m;
+
+}
+
+
+/*
+ * Checks whether or not floats A and B are less than 0.001 apart. If so,
+ * return true. Else, return false.
+ */
+
+bool in_range (float a, float b) {
+
+  if ( a < b + 0.001 && a > b - 0.001 )
+    return true;
+    
+  return false;
+
+}
+
+
+/* 
+ * Find the intersection of a cubic Bezier curve with the line X=x.
+ * Return 1 if an intersection was found and place the corresponding y
+ * value in *y.
+ * Return 0 if no intersection exists.
+ */
+ 
+int intersect_cubic_bezier_curve (float *y, control_point p[], float x) {
+
+  // calculates the x coordinates of P0 and P3 of the cubic Bezier curve
+  float p0 = minimum(p[0].x, p[1].x, p[2].x, p[3].x);
+  float p3 = maximum(p[0].x, p[1].x, p[2].x, p[3].x);
+
+  // if this x is out of range for this Bezier curve, there's no intersection
+  if ( x < p0 || x > p3 )
+    return 0;
+  
+  // prepare variables for the while loop
+  float u, ux, uy, lowerbound = 0.0, upperbound = 1.0;
+
+  // perform a binary search for the intersection, if we can find any
+  while ( !in_range(upperbound, lowerbound) ) {
+  
+    // set new middle point and evaluate it
+    u = (upperbound + lowerbound) / 2;
+    evaluate_bezier_curve(&ux, &uy, p, 4, u);
+  
+    // the calculated point is very close to the real thing
+    if ( in_range(ux, x) ) {
+      *y = uy;
+      return 1;
+    }
+    
+    // the calculated point is too far away
+    if ( ux > x )
+      upperbound = u;
+    else
+      lowerbound = u;
+  
+  }
+
+  // the binary search yielded no solutions, thus there's no intersection
+    
+  return 0;
+  
+}
+
