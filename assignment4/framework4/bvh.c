@@ -8,7 +8,7 @@
 
 //#define VERBOSE
 
-int use_bvh=1;
+int use_bvh=0;
 
 // The root node of the BVH
 bvh_node    *bvh_root;

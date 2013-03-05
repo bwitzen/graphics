@@ -36,7 +36,32 @@ shade_constant(intersection_point ip)
 vec3
 shade_matte(intersection_point ip)
 {
-    return v3_create(1, 0, 0);
+	int i;
+	vec3 a, b;
+	float dot_prod, light_matte = scene_ambient_light;
+	
+	// Calculate the light intensity in p for all the lights in the scene
+	for (i = 0; i < scene_num_lights; i++) {
+	
+		// Calculate the color of the light in i position
+		a = v3_normalize(v3_subtract(scene_lights[i].position, ip.p));
+	
+		// Use small offset in ray origin to avoid the problem of self-shadowing
+		b = v3_add(ip.p, v3_multiply(a, 0.1));
+	
+		// Calculate the color of light in i position and if there is no shadow and light is between [0, 1]
+		if (!shadow_check(b, a) && light_matte >= 0 && light_matte <= 1) {
+			//Calculate the contribution of light
+			dot_prod = v3_dotprod(ip.n, a);
+			//Check if the contribution of light it is not negative so not behind the point
+			if (dot_prod >= 0) {
+				//Sums the contribution of the all lights reaching that point 
+				light_matte += fmax(0, scene_lights[i].intensity * dot_prod);
+			}
+		}
+	}
+	//returns the vector calculated
+	return v3_create(light_matte, light_matte, light_matte);
 }
 
 vec3
