@@ -64,10 +64,92 @@ shade_matte(intersection_point ip)
 	return v3_create(light_matte, light_matte, light_matte);
 }
 
+
+/*
+ * Calculates shading in a particular intersection point
+ */
+
+float diffuse (intersection_point ip, light l_in) {
+
+  vec3 l = v3_normalize(v3_subtract(l_in.position, ip.p));
+
+  // start a bit above surface to avoid self-shading
+  if (shadow_check(v3_add(ip.p, v3_multiply(ip.n, 0.1)), l))
+    return 0.0;
+
+  // calculate the angle
+  float angle = v3_dotprod(ip.n, l);
+  
+  // return 0 if the lightsource is behind the surface
+  if (angle < 0.0)
+    return 0.0;
+
+  // otherwise, return the value
+  return l_in.intensity * angle;
+
+}
+
+
+/*
+ * Calculates the Blinn-phong shading in a particular intersection point
+ */
+
+float specular (intersection_point ip, light l_in, float phong) {
+
+  vec3 l = v3_normalize(v3_subtract(l_in.position, ip.p));
+
+  // start a bit above surface to avoid self-shading
+  if (shadow_check(v3_add(ip.p, v3_multiply(ip.n, 0.1)), l))
+    return 0.0;
+
+  // calculate h
+  vec3 h = v3_multiply(v3_add(ip.i, l), 1 / v3_length(v3_add(ip.i, l)));
+
+  // note that h dot n is always positive, so no further checks are needed
+
+  // return the value, raising angle to the power phong
+  return l_in.intensity * pow(v3_dotprod(ip.n, h), phong);
+
+}
+
+
+/*
+ * Note:
+ * Our blinn-phong function also uses the functions diffuse() and specular(). As
+ * explained by Jose Lagerberg on her slides.
+ *
+ * TODO; merge two forloops into one?
+ */
+
 vec3
 shade_blinn_phong(intersection_point ip)
 {
-    return v3_create(1, 0, 0);
+    
+  // perform the diffuse function for each scene light
+  // and then apply the weighing factor that was supplied
+  float light_red = scene_ambient_light;
+
+  for (int i = 0; i < scene_num_lights; i++)
+    light_red += diffuse(ip, scene_lights[i]);
+
+  light_red *= 0.8;
+
+  // perform the specular function for each scene light
+  // and then apply the weighing factor that was supplied
+  // 50 is the phong exponent
+  float light_all = 0;
+
+  for (int i = 0; i < scene_num_lights; i++)
+    light_all += specular(ip, scene_lights[i], 50);
+
+  light_all *= 0.5;
+
+  // add ALL to RED
+  light_red = light_red + light_all;
+
+  // done!
+  return v3_create(light_red, light_all, light_all);    
+
 }
 
 vec3
