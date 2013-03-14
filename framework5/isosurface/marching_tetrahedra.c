@@ -41,7 +41,96 @@ interpolate_points(unsigned char isovalue, vec3 p1, vec3 p2, unsigned char v1, u
 static int
 generate_tetrahedron_triangles(triangle *triangles, unsigned char isovalue, cell c, int v0, int v1, int v2, int v3)
 {
+  int bits[4] = {0, 0, 0, 0}; // easier than to work with hex atm
+
+  // check cell values against isovalue
+  if (c.value[v0] > isovalue)
+    bits[0] = 1;
+  if (c.value[v1] > isovalue)
+    bits[1] = 1;
+  if (c.value[v2] > isovalue)
+    bits[2] = 1;
+  if (c.value[v3] > isovalue)
+    bits[3] = 1;
+
+  // no triangles are returned if all bits are the same
+  if (bits[0] == 0 && bits[1] == 0 && bits[2] == 0 && bits[3] == 0)
     return 0;
+
+  if (bits[0] == 1 && bits[1] == 1 && bits[2] == 1 && bits[3] == 1)
+    return 0;
+
+  // handle the other 7 cases
+  vec3 midpoints[6];
+  int amt_of_triangles = 0;
+  if ((bits[0] == 0 && bits[1] == 0 && bits[2] == 0 && bits[3] == 1) ||
+      (bits[0] == 1 && bits[1] == 1 && bits[2] == 1 && bits[3] == 0)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v0], c.p[v1], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v0], c.p[v2], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v0], c.p[v3], 0, 0);
+    amt_of_triangles = 1;
+  }
+  else if ((bits[0] == 0 && bits[1] == 0 && bits[2] == 1 && bits[3] == 0) ||
+           (bits[0] == 1 && bits[1] == 1 && bits[2] == 0 && bits[3] == 1)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v1], c.p[v0], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v1], c.p[v2], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v1], c.p[v3], 0, 0);
+    amt_of_triangles = 1;
+  }
+  else if ((bits[0] == 0 && bits[1] == 1 && bits[2] == 0 && bits[3] == 0) ||
+           (bits[0] == 1 && bits[1] == 0 && bits[2] == 1 && bits[3] == 1)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v2], c.p[v0], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v2], c.p[v1], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v2], c.p[v3], 0, 0);
+    amt_of_triangles = 1;
+  }
+  else if ((bits[0] == 1 && bits[1] == 0 && bits[2] == 0 && bits[3] == 0) ||
+           (bits[0] == 0 && bits[1] == 1 && bits[2] == 1 && bits[3] == 1)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v2], c.p[v0], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v2], c.p[v1], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v2], c.p[v3], 0, 0);
+    amt_of_triangles = 1;
+  }
+  else if ((bits[0] == 0 && bits[1] == 0 && bits[2] == 1 && bits[3] == 1) ||
+           (bits[0] == 1 && bits[1] == 1 && bits[2] == 0 && bits[3] == 0)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v0], c.p[v1], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v0], c.p[v2], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v0], c.p[v3], 0, 0);
+    midpoints[3] = interpolate_points(isovalue, c.p[v1], c.p[v0], 0, 0);
+    midpoints[4] = interpolate_points(isovalue, c.p[v1], c.p[v2], 0, 0);
+    midpoints[5] = interpolate_points(isovalue, c.p[v1], c.p[v3], 0, 0);
+    amt_of_triangles = 2;
+  }
+  else if ((bits[0] == 0 && bits[1] == 1 && bits[2] == 0 && bits[3] == 1) ||
+           (bits[0] == 1 && bits[1] == 0 && bits[2] == 1 && bits[3] == 0)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v0], c.p[v1], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v0], c.p[v2], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v0], c.p[v3], 0, 0);
+    midpoints[3] = interpolate_points(isovalue, c.p[v2], c.p[v0], 0, 0);
+    midpoints[4] = interpolate_points(isovalue, c.p[v2], c.p[v1], 0, 0);
+    midpoints[5] = interpolate_points(isovalue, c.p[v2], c.p[v3], 0, 0);
+    amt_of_triangles = 2;
+  }
+  else if ((bits[0] == 0 && bits[1] == 1 && bits[2] == 1 && bits[3] == 0) ||
+           (bits[0] == 1 && bits[1] == 0 && bits[2] == 0 && bits[3] == 1)) {
+    midpoints[0] = interpolate_points(isovalue, c.p[v2], c.p[v0], 0, 0);
+    midpoints[1] = interpolate_points(isovalue, c.p[v2], c.p[v1], 0, 0);
+    midpoints[2] = interpolate_points(isovalue, c.p[v2], c.p[v3], 0, 0);
+    midpoints[3] = interpolate_points(isovalue, c.p[v3], c.p[v0], 0, 0);
+    midpoints[4] = interpolate_points(isovalue, c.p[v3], c.p[v1], 0, 0);
+    midpoints[5] = interpolate_points(isovalue, c.p[v3], c.p[v2], 0, 0);
+    amt_of_triangles = 2;
+  }
+
+  // set the triangle vectors
+  triangles[0].p[0] = midpoints[0];
+  triangles[0].p[1] = midpoints[1];
+  triangles[0].p[2] = midpoints[2];
+  triangles[1].p[0] = midpoints[3];
+  triangles[1].p[1] = midpoints[4];
+  triangles[1].p[2] = midpoints[5];
+  
+  return amt_of_triangles;
 }
 
 /* Generate triangles for a single cell for the given iso-value. This function
@@ -56,5 +145,12 @@ generate_tetrahedron_triangles(triangle *triangles, unsigned char isovalue, cell
 int
 generate_cell_triangles(triangle *triangles, cell c, unsigned char isovalue)
 {
-    return 0;
+    int amt_of_triangles = 0;
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 1, 3, 7); // t1
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 2, 6, 7); // t2
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 1, 5, 7); // t3
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 2, 3, 7); // t4
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 4, 5, 7); // t5
+    amt_of_triangles += generate_tetrahedron_triangles(triangles, isovalue, c, 0, 4, 6, 7); // t6
+    return amt_of_triangles;
 }

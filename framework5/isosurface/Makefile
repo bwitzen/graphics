@@ -2,14 +2,14 @@ CC=gcc
 
 WARNING_FLAGS=-Wall -Wextra -Werror-implicit-function-declaration -Wshadow -Wstrict-prototypes -pedantic-errors
 CFLAGS=-g -O2 -std=c99 $(WARNING_FLAGS)
-LDFLAGS=-g -lGL -lglut -lGLU
+LDFLAGS=-g -lGL -lglut -lGLU -lm
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
 all: main
 main: main.o marching_tetrahedra.o volume.o
-	$(CC) $(LDFLAGS) -o main main.o marching_tetrahedra.o volume.o
+	$(CC) -o main main.o marching_tetrahedra.o volume.o $(LDFLAGS)
 
 clean:
 	rm -f *.o

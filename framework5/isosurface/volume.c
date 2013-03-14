@@ -38,6 +38,31 @@ cell
 get_cell(int i, int j, int k)
 {
     cell c;
+
+    // get values
+    c.value[0] = volume[voxel2idx(i, j, k)];
+    c.value[1] = volume[voxel2idx(i+1, j, k)];
+    c.value[2] = volume[voxel2idx(i, j+1, k)];
+    c.value[3] = volume[voxel2idx(i+1, j, k)];
+    c.value[4] = volume[voxel2idx(i+1, j+1, k)];
+    c.value[5] = volume[voxel2idx(i+1, j, k+1)];
+    c.value[6] = volume[voxel2idx(1, j+1, k+1)];
+    c.value[7] = volume[voxel2idx(i+1, j+1, k+1)];
+
+    // get vectors
+    c.p[0] = v3_create(i, j, k);
+    c.p[1] = v3_create(i+1, j, k);
+    c.p[2] = v3_create(i, j+1, k);
+    c.p[3] = v3_create(i+1, j, k);
+    c.p[4] = v3_create(i+1, j+1, k);
+    c.p[5] = v3_create(i+1, j, k+1);
+    c.p[6] = v3_create(1, j+1, k+1);
+    c.p[7] = v3_create(i+1, j+1, k+1);
+
+    // get normalized vectors
+    for (int i = 0; i < 8; i++)
+      c.n[i] = v3_normalize(c.p[i]);
+
     return c;
 }
 
