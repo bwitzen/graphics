@@ -1,0 +1,32 @@
+# the vertices form a diamond when seen 'flat'
+# the diamond is then folded into the tree shape by knacking
+# it on certain points
+v 0.0   0.0   0.0
+v 0.3   0.2   -0.35
+v 0.6   0.1   -0.35
+v 0.9   -0.3  -0.35
+v 1.2   -0.5  0.0
+v 0.9   -0.3  0.35
+v 0.6   0.1   0.35
+v 0.3   0.2   0.35
+
+# the polygons divide the diamond into three parts; the top
+# and bottom triangle, and the centre square
+p 3 6
+1.0 1.0 1.0
+0 0.5 0.0
+1 1.0 0.25
+7 0.0 0.25
+
+p 4 6
+1.0 1.0 1.0
+1 1.0 0.25
+3 1.0 0.75
+5 0.0 0.75
+7 0.0 0.25
+
+p 3 6
+1.0 1.0 1.0
+3 1.0 0.75 
+4 0.5 1.0
+5 0.0 0.75

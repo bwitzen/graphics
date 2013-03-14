@@ -103,8 +103,10 @@ setHemispherePoint(vec3 *p, vec3* n, vec3* t, int latitude, int longitude,
     p->z = oz + cos(longitude * dToR) * cos(latitude * dToR) * s;
 
     // Set texture coordinate
-    t->x = 0.0;
-    t->y = 0.0;
+
+    // > NOTE: adjusted code here
+    t->x = longitude / 360.0;
+    t->y = latitude / 90.0;
 
     // calculate normal
     n->x = p->x - ox;

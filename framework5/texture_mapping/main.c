@@ -131,16 +131,19 @@ InitializePolygonlists(void)
     loadPolygonalObject(polylistHouse, "house.obj", texture_names, 1.0,
         object_positions[0].x, object_positions[0].y, object_positions[0].z);
 
-    // A single tree object
-    polylistTreeLeafs = CreatePolylist(10);
-    createSphere(polylistTreeLeafs, 0.7, 0.7, 0.7,  0, 1.7, 0,  0, 1, 0);
-    for (i = 0; i < polylistTreeLeafs->length; i++)
-        polylistTreeLeafs->items[i].texture_id = texture_names[0];
-
     polylistTreeStem = CreatePolylist(10);
+    polylistTreeLeafs = CreatePolylist(10);
     createCylinder(polylistTreeStem, 0.075, 1.8,  0, 0, 0,  0.5, 0.3, 0);
-    for (i = 0; i < polylistTreeStem->length; i++)
+    // handle drawing tree stems and tree leafs
+    for (i = 0; i < polylistTreeStem->length; i++) {
         polylistTreeStem->items[i].texture_id = texture_names[3];
+        polylistTreeLeafs->items[i].texture_id = texture_names[0];
+        loadPolygonalObject(polylistTreeLeafs, "leaf.obj", texture_names, 1.0,
+            0.0, 1.8, 0.0);
+    }
+
+    // A single tree object
+
 
     // Done!
     printf("%d polygons\n",
@@ -257,14 +260,18 @@ InitGL(void)
             glBindTexture(GL_TEXTURE_2D, texture_names[i]);
             glCheckError("glBindTexture");
 
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // added REPEAT
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // added REPEAT
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR); // added MIP
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // added MIP
             glCheckError("glTexParameteri");
 
+            /* 
             glTexImage2D(GL_TEXTURE_2D, 0, texture_internal_format,
                 width, height, 0, texture_format, texture_type, image_data);
+            */
+            gluBuild2DMipmaps(GL_TEXTURE_2D, texture_internal_format,
+                width, height, texture_format, texture_type, image_data);
             glCheckError("glTexImage2D");
 
             // Free the image data, as OpenGL will have made its internal copy by now
@@ -313,6 +320,7 @@ DrawPolylist(polys * list)
         for (j = 0; j < p.points; j++)
         {
             glNormal3f(p.normal[j].x, p.normal[j].y, p.normal[j].z);
+	    glTexCoord2f(p.tcoord[j].x,p.tcoord[j].y);
             glVertex3f(p.pts[j].x, p.pts[j].y, p.pts[j].z);
         }
         glEnd();
@@ -420,7 +428,13 @@ DrawGLScene(void)
         glScalef(1, 1 + (rand_float()-0.5)*0.6, 1);
 
         DrawPolylist(polylistTreeStem);
-        DrawPolylist(polylistTreeLeafs);
+        // draw multiple tree leaves - between 5 and 10 per tree, but oriented
+        // perfectly for better visibility
+        int random = rand() % 6 + 5;
+        for (int i = 0; i < random; i++) {
+          glRotatef(360.0 - i * (360.0/(float)random), 0, 1, 0);
+          DrawPolylist(polylistTreeLeafs);
+        } 
 
         glPopMatrix();
     }
@@ -429,7 +443,8 @@ DrawGLScene(void)
 
     glPushAttrib(GL_LIGHTING_BIT);
     glDisable(GL_LIGHTING);
-    //DrawPolylist(polylistSkydome);
+    // > NOTE: uncommented this line of code
+    DrawPolylist(polylistSkydome);
     glPopAttrib();
 
     glutSwapBuffers();
