@@ -1,17 +1,18 @@
-/* Computer Graphics, Assignment "Texture Mapping"
+/* *****************************************************************************
  *
- * Filename ........ main.c
- * Description ..... Creates OpenGL window and draws the scene.
- * Created by ...... Paul Melis, Robert Belleman, Jurgen Sturm
+ * Computer Graphics - University of Amsterdam
+ * Assignment 5.1
  *
- * Student name ....
- * Student email ...
- * Collegekaart ....
- * Date ............
- * Comments ........
+ * Lorenzo Liberatore <l.liberatore@gmail.com>
+ * Ben Witzen <benwitzen@live.nl>
+ * March 8th, 2013
  *
- * (always fill in these fields before submitting!!)
- */
+ * Part of assignment 5.
+ * TODO README FIXME DONT FORGET
+ * also need to add cylindre shape for the trees @ geometry.c
+ *
+ * ************************************************************************** */
+
 
 #if defined(__GNUC__)
 #define glCheckError(s) { GLenum error; if ((error=glGetError())) \

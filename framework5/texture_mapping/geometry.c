@@ -1,18 +1,19 @@
-/* Computer Graphics, Assignment, Texture Mapping
+/* *****************************************************************************
  *
- * Filename ........ geometry.c
- * Description .....
- * Date ............ 22.11.2007
- * Created by ...... Paul Melis
+ * Computer Graphics - University of Amsterdam
+ * Assignment 5.2
  *
- * Student name ....
- * Student email ...
- * Collegekaart ....
- * Date ............
- * Comments ........
+ * Lorenzo Liberatore <l.liberatore@gmail.com>
+ * Ben Witzen <benwitzen@live.nl>
+ * March 8th, 2013
  *
- * (always fill in these fields before submitting!!)
- */
+ * Part of assignment 5.
+ *
+ * TODO README FIXME DONT FORGET
+ * also need to add cylindre shape for the trees
+ *
+ * ************************************************************************** */
+
 
 #include <math.h>
 #include <stdio.h>
