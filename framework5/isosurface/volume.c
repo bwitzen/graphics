@@ -1,13 +1,15 @@
-/* Computer Graphics, Assignment, Volume rendering with cubes/points/isosurface
+/* *****************************************************************************
  *
- * Student name ....
- * Student email ...
- * Collegekaart ....
- * Date ............
- * Comments ........
+ * Computer Graphics - University of Amsterdam
+ * Assignment 5.2
  *
- * (always fill in these fields before submitting!!)
- */
+ * Lorenzo Liberatore <l.liberatore@gmail.com>
+ * Ben Witzen <benwitzen@live.nl>
+ * March 8th, 2013
+ *
+ * Part of assignment 5.
+ *
+ * ************************************************************************** */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,30 +41,19 @@ get_cell(int i, int j, int k)
 {
     cell c;
 
-    // get values
-    c.value[0] = volume[voxel2idx(i, j, k)];
-    c.value[1] = volume[voxel2idx(i+1, j, k)];
-    c.value[2] = volume[voxel2idx(i, j+1, k)];
-    c.value[3] = volume[voxel2idx(i+1, j, k)];
-    c.value[4] = volume[voxel2idx(i+1, j+1, k)];
-    c.value[5] = volume[voxel2idx(i+1, j, k+1)];
-    c.value[6] = volume[voxel2idx(1, j+1, k+1)];
-    c.value[7] = volume[voxel2idx(i+1, j+1, k+1)];
+    // offsets needed to encapsulate in for-loop
+    float i_array[8] = {i+0, i+1, i+0, i+1, i+0, i+1, i+0, i+1};
+    float j_array[8] = {j+0, j+0, j+1, j+1, j+0, j+0, j+1, j+1};
+    float k_array[8] = {k+0, k+0, k+0, k+0, k+1, k+1, k+1, k+1};
 
-    // get vectors
-    c.p[0] = v3_create(i, j, k);
-    c.p[1] = v3_create(i+1, j, k);
-    c.p[2] = v3_create(i, j+1, k);
-    c.p[3] = v3_create(i+1, j, k);
-    c.p[4] = v3_create(i+1, j+1, k);
-    c.p[5] = v3_create(i+1, j, k+1);
-    c.p[6] = v3_create(1, j+1, k+1);
-    c.p[7] = v3_create(i+1, j+1, k+1);
+    // fill the cell
+    for (int a = 0; a < 8; a++) {
+      c.p[a] = v3_create(i_array[a], j_array[a], k_array[a]);
+      c.n[a] = v3_crossprod(c.p[a], v3_set_component(c.p[a], 0, c.p[a].x + 1));
+      c.value[a] = volume[voxel2idx(i_array[a], j_array[a], k_array[a])];
+    }
 
-    // get normalized vectors
-    for (int i = 0; i < 8; i++)
-      c.n[i] = v3_normalize(c.p[i]);
-
+    // return the cell
     return c;
 }
 

@@ -1,18 +1,16 @@
-/* Computer Graphics, Assignment, Volume rendering with cubes/points/isosurface
+/* *****************************************************************************
  *
- * Filename ........ main.c
- * Description ..... Creates OpenGL window and draws the scene.
- * Date ............ 29.10.2007
- * Created by ...... Paul Melis
+ * Computer Graphics - University of Amsterdam
+ * Assignment 5.2
  *
- * Student name ....
- * Student email ...
- * Collegekaart ....
- * Date ............
- * Comments ........
+ * Lorenzo Liberatore <l.liberatore@gmail.com>
+ * Ben Witzen <benwitzen@live.nl>
+ * March 8th, 2013
  *
- * (always fill in these fields before submitting!!)
- */
+ * Part of assignment 5.
+ *
+ * ************************************************************************** */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -225,34 +223,28 @@ void DrawVolumeAsIsosurface(void)
 
 void FillArrayWithIsosurface(void)
 {
-    int i, j, k;
-    int idx;
-    int amt;
-    triangle triangles[12];
+  cell c;
+  vec3 v, n;
+  triangle triangles[12];
+  int amt, amt_total = 0;
 
-    idx = 0;
-
-    for (k = 0; k < nz; k++)
-    {
-        for (j = 0; j < ny; j++)
-        {
-            for (i = 0; i < nx; i++)
-            {
-                if (abs(volume[idx]-isovalue) <= epsilon)
-                {
-                    // get cell
-                    cell c = get_cell(i,j,k);
-                    amt = generate_cell_triangles(triangles, c, isovalue);
-                    for (int a = 0; a < amt; i++) {
-                        AddVertexToArray(triangles[a].p[0], triangles[a].p[1]);
-                        AddVertexToArray(triangles[a].p[1], triangles[a].p[2]);
-                        AddVertexToArray(triangles[a].p[2], triangles[a].p[0]);
-                    }
-                }
-                idx++;
-            }
+  for (int k = 0; k < nx; k++) {
+    for (int j = 0; j < ny; j++) {
+      for (int i = 0; i < nz; i++) {
+        c = get_cell(i, j, k);
+        amt = generate_cell_triangles(triangles, c, isovalue);
+        amt_total += amt;
+        for (int a = 0; a < amt; a++) {
+          for (int b = 0; b < 3; b++) {
+            v = triangles[a].p[b];
+            n = triangles[a].n[b];
+            AddVertexToArray(v, n);
+          }
         }
+      }
     }
+  }
+  printf("\nTRIANGLE COUNT = %d\n", amt_total);
 }
 
 void DrawScene(void)
