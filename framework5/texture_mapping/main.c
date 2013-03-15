@@ -8,8 +8,6 @@
  * March 8th, 2013
  *
  * Part of assignment 5.
- * TODO README FIXME DONT FORGET
- * also need to add cylindre shape for the trees @ geometry.c
  *
  * ************************************************************************** */
 

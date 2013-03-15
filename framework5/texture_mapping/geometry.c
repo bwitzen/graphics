@@ -9,9 +9,6 @@
  *
  * Part of assignment 5.
  *
- * TODO README FIXME DONT FORGET
- * also need to add cylindre shape for the trees
- *
  * ************************************************************************** */
 
 
@@ -201,7 +198,9 @@ createCylinder(polys * list, double radius, double height,
             p.normal[i].z /= len;
 
             // Set texture coordinate
-            p.tcoord[i].x = p.tcoord[i].y = 0.0;
+            //p.tcoord[i].x = p.tcoord[i].y = 0.0;
+            p.tcoord[i].x = longitude / 360.0;
+            p.tcoord[i].y = 0;
         }
 
         AddPolyToPolylist(list, p);
