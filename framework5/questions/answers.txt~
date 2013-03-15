@@ -1,0 +1,15 @@
+1. What happens for cases 0011/1100 when two of the vertex values are equal to the
+   ISO value and two vertex values are greater than the ISO value?
+
+2. We render two-sided, without backface culling. If the isosurface froms a
+   closed surface, there would be no need for this. When does an isosurface not
+   from a closed surface?
+
+A. When the ISOsurface contains a flat object - one that is thinner than the width
+   of a cell.
+
+3. Optimize the algorithm in 2.2.
+
+A. We can parallelize the forloops for both the C and the T structures. In
+   addition, some Tś will have shared points leading to shared vertices. For
+   those, calculations are performed multipe times (=redundant).
