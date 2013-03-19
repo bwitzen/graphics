@@ -4,12 +4,9 @@ TARNAME = box2d.tgz
 
 CC = g++
 
-# Ubuntu uses libbox2d instead of libBox2D.
-LBOX2D = $(shell test -f /etc/debian_version && echo -lbox2d || echo -lBox2D)
-
 WARNFLAGS = -Wall -Wshadow -pedantic-errors
 CFLAGS = -g -O2 $(WARNFLAGS) -Iinclude/
-LFLAGS = -lGL -lglut $(LBOX2D)
+LFLAGS = -lGL -lglut -lBox2D
 
 # Do some substitution to get a list of .o files from the given .cpp files.
 OBJFILES = $(patsubst %.cpp,%.o,$(SRCFILES))
