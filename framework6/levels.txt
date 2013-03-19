@@ -1,0 +1,17 @@
+# Only a ball and the endpoint, above each other.
+basic
+
+# Has one polygon, a slope which the balls rolls down into the endpoint.
+basic_polygon
+
+# Has two slope things with a gap in between. First one that requires user
+# interaction.
+first_gap
+
+# This one has a slope, and then a horizontal platform, which is too low. This
+# requires a big box.
+platform_too_low
+
+# This one has no slope, the player has to figure out how to get the ball
+# moving.
+horizontal_plane
