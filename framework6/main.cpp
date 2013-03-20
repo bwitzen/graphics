@@ -29,6 +29,11 @@ int frame_count;
 float color_fi = 0.0;
 float color_r = 1, color_g = 1, color_b = 1;
 
+// stuff related to player drawing new polygons
+int world_polygons;
+int mouse_clicks;
+float new_polygon_vertices[8];
+
 // Information about the levels loaded from files will be available in these.
 unsigned int num_levels;
 unsigned int current_level;
@@ -127,6 +132,12 @@ void load_world(unsigned int lvl) {
   
   // cast level variable to global
   current_level = lvl;
+  // cast amount of polygons to global
+  world_polygons = levels[lvl].num_polygons;
+  // reset mouseclicks
+  mouse_clicks = 0;
+  for (int i = 0; i < 8; i++)
+    new_polygon_vertices[i] = 0;
   
   //
   // INITIALIZE OPENGL
@@ -139,7 +150,7 @@ void load_world(unsigned int lvl) {
   // CREATE WORLD
   //
   
-  b2Vec2 gravity(0.0f, -10.0f);
+  b2Vec2 gravity(0.0f, -.4f);
   world = new b2World(gravity);
 
   //
@@ -232,7 +243,23 @@ void draw(void) {
     load_world(current_level+1);
   }
   
+  /*
+  b2Body *bodyList = world->GetBodyList();
+  for (int i = 0; i < world_polygons; i++) {
+    // Note: supports only one fixture per body
+    b2Fixture *fixture = bodyList->GetFixtureList();
+    // extract shape
+    
+    
+    
+    bodyList += sizeof(bodyList);
+  }
+  */
+  
+  
   // draw polygons
+  // NOTE: this only supports level-specific polygons, not ones added by mouse
+  //       im rewriting this ...
   int amt;
   for (int i = 0; i < levels[current_level].num_polygons; i++) {
     amt = levels[current_level].polygons[i].num_verts;
@@ -246,6 +273,7 @@ void draw(void) {
     }
     draw_polygon(array, amt, .0f, color_g * color_fi, .0f);
   }
+  
   
   // draw finish
   float finish[12] = { levels[current_level].end.x - .025f, levels[current_level].end.y - .025f, .0f,
@@ -301,9 +329,24 @@ void key_pressed(unsigned char key, int x, int y)
 /*
  * Called when the user clicked (or released) a mouse buttons inside the window.
  */
-void mouse_clicked(int button, int state, int x, int y)
-{
+void mouse_clicked(int button, int state, int x, int y) {
 
+  int conv_x = x;
+  int conv_y = reso_y - y;
+  
+  if (state) {
+    printf("Mouse clicked at %d %d\n", conv_x, conv_y);
+    new_polygon_vertices[mouse_clicks++] = conv_x;
+    new_polygon_vertices[mouse_clicks++] = conv_y;
+    if (mouse_clicks == 8) {
+      printf("added polygon\n");
+      box2d_polygon(new_polygon_vertices, 4);
+      world_polygons++;
+      mouse_clicks = 0;
+    }
+    
+  }
+  
 }
 
 /*
