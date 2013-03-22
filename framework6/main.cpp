@@ -46,34 +46,6 @@ typedef struct polydraw {
 
 polydraw * first;
 
-
-int music_player () {
-        pid_t x;      // a special kind of int
-        char kil[20] = "kill -s 9 ";
- 
-        x = fork();   /* now there's actually two "x"s:
-if fork succeeds, "x" to the CHILD PROCESS is the return value of fork (0)
-and "x" to the PARENT PROCESS is the actual system pid of the child process.*/
-         
-        if (x < 0) {  // just in case fork fails
-                puts("fork failure");
-                exit(-1);
-        }  
-        else if (x == 0) { // therefore this block will be the child process
-                execlp("mpg123", "mpg123", "-q", "/songs/bertha.mp3", 0);
-        }                   // see GNU docs, "system" also works               
-        else {  printf("from parent: mpg123 is pid %d\nENTER to quit\n", x);
-                sprintf(kil,"%s%d",kil,x);
-                getchar();  // wait for user input
-                system(kil);
-                printf("All ");
-        }       /* witness that the "else if" and "else" blocks are both executed here in parallel. The "else"
-   (parent) block is continuous with the rest of the program (since the PARENT PROCESS is actually
-   the program itself) so... */
-        printf("done.\n");
-        exit(0);
-}
-
 /*
  * Function adds a polygon to the world. Does no error handling, but does
  * bounce if AMT is invalid. It also adds a polydraw to our linked list!
